@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
             <Sidebar />
             <div className="flex-1 flex flex-col">
               <div className="flex-1 ">{children}</div>
-              <Footer />
+       
             </div>
           </div>
         </div>

@@ -1,15 +1,46 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const RealtimeMonitoring = () => {
-  // Example values for each parameter
-  const parameters = [
-    { name: "Temperature", value: "25°C" },
-    { name: "Pressure", value: "1.2 atm" },
-    { name: "Humidity", value: "60%" },
-    { name: "pH Level", value: "7.2" },
-    { name: "TDS", value: "300 ppm" },
-    { name: "Chlorine Level", value: "0.5 ppm" },
-  ];
+  const [parameters, setParameters] = useState([]);
+
+  useEffect(() => {
+    const fetchParameters = async () => {
+      try {
+        const response = await axios.get(
+          "https://hmi-backend-q9o67stnr-webdevavas-projects.vercel.app/api/parameters/latest"
+        );
+        console.log("API response:", response.data);
+
+        if (response.status === 200) {
+          const data = response.data.parameters;
+          const transformedParameters = [
+            { name: "Temperature", value: `${data.Temperature}°C` },
+            { name: "Pressure", value: `${data.Pressure} atm` },
+            { name: "Humidity", value: `${data.Humidity}%` },
+            { name: "pH Level", value: `${data["pH Level"]}` },
+            { name: "TDS", value: `${data.TDS} ppm` },
+            { name: "Chlorine Level", value: `${data["Chlorine Level"]} ppm` },
+          ];
+          setParameters(transformedParameters);
+        } else {
+          console.error("Failed to fetch parameters:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching parameters:", error);
+      }
+    };
+
+    // Initial fetch
+    fetchParameters();
+
+    // Set interval for refreshing data
+    const intervalId = setInterval(fetchParameters, 1000); // Refresh every 5 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div>
